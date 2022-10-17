@@ -1,0 +1,84 @@
+---
+title: "ASSIST - results"
+output: pdf_document
+---
+```{r}
+library(knitr)
+library(kableExtra)
+```
+
+```{r, include=FALSE}
+rm(list = ls())
+source("/Volumes/dcn_assist-8/PROCESSING/scripts/PROCESSING_MAIN_ASSIST.R", echo = F, print.eval = F)
+```
+
+
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+
+
+## Descriptives 
+Descriptive statistics
+```{r, echo = F}
+kable(datAnalyse_mean, col.names =(rep("",ncol(datAnalyse_mean))),
+      caption="Means", row.names=T)%>% 
+column_spec(1,width = "2in")%>%
+column_spec(2:6,width = "0.5in")
+```
+
+```{r, echo = F}
+kable(datAnalyse_sd, col.names =(rep("",ncol(datAnalyse_sd))),
+      caption="SDs", row.names=T)%>% 
+column_spec(1,width = "2in")%>%
+column_spec(2:6,width = "0.5in")
+```
+
+\clearpage
+
+## Plots
+
+Plot of outcomes
+\newpage
+```{r, echo=F}
+grid.draw(bf2)
+```
+\newpage
+```{r, echo=F, fig.height = 15, fig.width = 15}
+grid.draw(bf3)
+```
+\newpage
+```{r, echo=F}
+grid.draw(bf4)
+```
+
+\newpage
+## Regression
+Output of regression model, which was:
+lme(DV ~  Age + factor(Sex) + factor(Condition) * factor(Intervention_Phase))
+if interaction is not significant, the model is recalculated without the interaction term
+
+
+```{r, echo = F}
+first_third <- c(1:(nrow(res_all_DV)/3))
+second_third <- c(nrow(res_all_DV)/3+1):(nrow(res_all_DV)/3*2)
+last_third <- c(nrow(res_all_DV)/3*2+1):(nrow(res_all_DV))
+kable(cbind(res_all_DV[first_third, c("DV","IVs")], round (res_all_DV[first_third,c("Pr(>Chisq)", "t-value", "r")], digits = 4)), caption="Regression Results", row.names=F)%>%
+kable_styling(font_size = 7,   latex_options = "scale_down")
+```
+```{r, echo = F}
+kable(cbind(res_all_DV[second_third, c("DV","IVs")], round (res_all_DV[second_third,c("Pr(>Chisq)", "t-value", "r")], digits = 4)), caption="Regression Results", row.names=F)%>%
+kable_styling(font_size = 7,   latex_options = "scale_down")
+```
+```{r, echo = F}
+kable(cbind(res_all_DV[last_third, c("DV","IVs")], round (res_all_DV[last_third,c("Pr(>Chisq)", "t-value", "r")], digits = 4)), caption="Regression Results", row.names=F)%>%
+kable_styling(font_size = 7,   latex_options = "scale_down")
+```
+
+
+res_sub_all_DV
+main_effects_all
+sub_effects_all
+summary_N_all
