@@ -1,5 +1,8 @@
 # Virtual-Reality-Gaze-Exposure
-Code underlying the data analysis of: Virtual reality gaze exposure treatment reduces fear of public speaking: A randomized controlled trial
+Code underlying the data analysis of "Virtual reality gaze exposure treatment reduces fear of public speaking: A randomized controlled trial"
+
+## To use the script please adjust the processing path and sources of the data. 
+## To this end, please adapt the lines 43, 80 and 358.
 
 Abstract:
 Fear of public speaking is widespread. While sufferers typically avoid eye contact with the audience it is not known if reducing gaze avoidance can alleviate their fear. 
