@@ -2,6 +2,8 @@
 
 # Fabian - 2022.12.03
 
+# Updated 2023.05.23 to include demographics information to impute the datasets. 
+
 #---- set system language to "en", clean workspace, scientific notation -----------------------------------------------------------
 rm(list = ls())
 #options("scipen"=100, "digits"=5)
@@ -27,8 +29,7 @@ library(mice)
 library(broom.mixed)
 
 #---- Import Data relevant for the ITT (dat.Analyse) --------------------------------------------------------------------------------------
-load("/Users/fmueller/Documents/GitHub/ASSIST/DATA/dat_Analyse_PROTOCOLL.RData")  # MAKE SURE TO ADJUST PATH! 
-
+load("/Users/fmueller/Documents/GitHub/ASSIST/DATA/dat_Analyse_PROTOCOLL_demo.RData")  # MAKE SURE TO ADJUST PATH! 
 
 
 #---- 1.0 add Variable: "baseline measurement of fear" to dataframe # to control for baseline at PostHoc Tests ----------------------------
@@ -40,7 +41,48 @@ names(mean_baseline_fear) [which(names(mean_baseline_fear) %in% "Angst_im_moment
 datAnalyse <-merge(datAnalyse, mean_baseline_fear, by = "VP_Nr")
 
 #Reduce the dataset to the required data for the main analysis for ITT
-redDat <- datAnalyse  %>% select(Angst_im_moment, Sex, Age, Condition, Intervention_Phase, VP_Nr, Angst_im_moment_baseline)
+redDat <- datAnalyse  %>% select(Angst_im_moment, Sex, Age, Condition, Intervention_Phase, VP_Nr, Angst_im_moment_baseline, Ausbildung)
+
+
+
+
+### Newly added demographics for imputating datasets ############################################################ 
+
+# re-code the variable demographics to a numeric code
+
+
+
+# Encode the "Ausbildung" column.  # With this code the original numerical coding from SoSci is brought back. 
+# Additionally I had to specify that andere ausbildung is coded as 0 and then replaced by NA. This is the case for one participant only. 
+
+datAnalyse_encoded <- redDat %>%
+  mutate(Ausbildung_encoded = case_when(
+    Ausbildung == "andere Ausbildung:" ~ 0,
+    TRUE ~ as.numeric(Ausbildung)))
+
+# Replace 0 values with NA in the "Ausbildung_encoded" column
+datAnalyse_encoded <- datAnalyse_encoded %>%
+  mutate(Ausbildung_encoded = ifelse(Ausbildung_encoded == 0, NA, Ausbildung_encoded))
+
+
+# rename back to redDat and proceed the MI
+redDat <- datAnalyse_encoded
+
+
+# Rename the "Ausbildung_encoded" column to "edu"
+redDat <- redDat %>%
+  rename(edu = Ausbildung_encoded)
+
+# Remove column "Ausbildung"
+redDat <- redDat %>%
+  select(-Ausbildung)
+
+# View the updated dataset
+head(redDat)
+
+### Data including demographics is ready for MI; in default setting of mice, all included data are used for imputation
+
+
 
 #---- 2.0 MCAR-Test: test if NA's are completely at random: if sign => suggests they are not completely at random  -----------------------------------------------------------------
 
@@ -69,6 +111,7 @@ print (percentage)
 
 # 3.2 Impute 10 datasets using the Mice function ------------------------------------------------------------------------------------------------------------------
 MI_Data <- mice(redDat, m = 10, maxit = 20, seed = 420) # 
+# in default setting of mice, all included data are used for imputation
 
 MI_Data_com <- complete(MI_Data,"long", inc = F)
 
